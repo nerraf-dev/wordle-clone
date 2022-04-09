@@ -45,3 +45,29 @@ document.addEventListener("keyup",(e) => {
         insertLetter(pressedKey);
     }
 })
+
+//insert letter
+function insertLetter(pressedKey){
+    if (nextLetter === 5){
+        return;
+    }
+    pressedKey = pressedKey.toLowerCase();
+
+    let row = document.getElementsByClassName("letter-row")[6 - guessingRemaining];
+    let box = row.children[nextLetter];
+    box.textContent = pressedKey;
+    box.classList.add("filled-box");
+    currentGuess.push(pressedKey);
+    nextLetter += 1
+}
+
+//delete letter
+function deleteLetter(){
+    let row = document.getElementsByClassName("letter-row")[6 - guessingRemaining];
+    let box = row.children[nextLetter];
+    box.textContent = "";
+    box.classList.remove("filled-box");
+    currentGuess.pop();
+    nextLetter -=1;
+}
+
