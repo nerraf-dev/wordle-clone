@@ -64,10 +64,104 @@ function insertLetter(pressedKey){
 //delete letter
 function deleteLetter(){
     let row = document.getElementsByClassName("letter-row")[6 - guessingRemaining];
-    let box = row.children[nextLetter];
+    let box = row.children[nextLetter -1];
     box.textContent = "";
     box.classList.remove("filled-box");
     currentGuess.pop();
     nextLetter -=1;
 }
 
+//  check guess
+function checkGuess(){
+    let row = document.getElementsByClassName("letter-row")[6 - guessingRemaining];
+    let guessString = "";
+    let correctGuess = Array.from(correctGuessString);
+
+    for(const val of currentGuess){
+        guessString += val;
+    }
+
+    if(guessString.length != 5){
+        toastr.error("Not enough letters!");
+        return;
+    }
+
+    if(!WORDS.includes(guessString)){
+        toastr.error("Word not in list");
+        return;
+    }
+
+    for(let i = 0; i < 5; i++){
+        let letterColour = "";
+        let box = row.children[i];
+        let letter = currentGuess[i];
+
+        let letterPosition = correctGuess.indexOf(currentGuess[i]);
+        //is letter in current guess?
+        if(letterPosition === -1){
+            letterColour = "grey";
+        } else {
+            //letter is in the word
+            //if correctGuess index == currentGuess index  - correct position
+            if(currentGuess[i] === correctGuess[i]){
+                // shade green
+                letterColour = "green";
+            } else {
+                letterColour = "yellow";
+            }
+            correctGuess[letterPosition] = "#";
+        }
+
+        let delay = 250 * i;
+        setTimeout(() => {
+            //shade box
+            box.style.backgroundColor = letterColour;
+            shadeKeyBoard(letter, letterColour);
+        }, delay)
+    }
+    if(guessString === correctGuessString){
+        toastr.success("You guess right!");
+        guessingRemaining = 0;
+        return;
+    } else {
+        guessingRemaining -= 1;
+        currentGuess = [];
+        nextLetter = 0;
+
+        if(guessingRemaining === 0){
+            toastr.error("You've run out of guesses, game over!");
+            toastr.info(`The right word was: "${correctGuessString}"`);
+
+        }
+    }
+}
+
+function shadeKeyBoard(letter, color) {
+    for (const elem of document.getElementsByClassName("keyboard-button")) {
+        if (elem.textContent === letter) {
+            let oldColor = elem.style.backgroundColor
+            if (oldColor === 'green') {
+                return
+            } 
+
+            if (oldColor === 'yellow' && color !== 'green') {
+                return
+            }
+
+            elem.style.backgroundColor = color
+            break
+        }
+    }
+}
+
+document.getElementById("keyboard").addEventListener("click",(e) =>{
+    const target = e.target;
+    if(!target.classList.contains("kb-button")){
+        return;
+    }
+    let key = target.textContent;
+    if(key === "Del"){
+        key = "Backspace";
+    }
+    document.dispatchEvent(new KeyboardEvent("keyup", {'key': key}));
+})
